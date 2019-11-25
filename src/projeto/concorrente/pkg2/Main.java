@@ -9,7 +9,7 @@ package projeto.concorrente.pkg2;
  *
  * @author rodri
  */
-public class PROJETOCONCORRENTE2 {
+public class Main {
 
     /**
      * @param args the command line arguments
