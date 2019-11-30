@@ -5,10 +5,12 @@
  */
 package projeto.concorrente.pkg2;
 
-import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -50,18 +52,25 @@ public class Main {
                                  atu1 = Integer.parseInt(st.nextToken ());
                                  atu2 = Integer.parseInt(st.nextToken ());
                                  atu3 = Integer.parseInt(st.nextToken ());
-                                 System.out.println("Atu1:"+atu1 +" Atu1:"+atu2 +" Atu1:"+atu3);
+                                // System.out.println("Atu1:"+atu1 +" Atu1:"+atu2 +" Atu1:"+atu3);
                                  //valores a serem diminuidos linha i;
                                  dim1 = Integer.parseInt(st1.nextToken ());
                                  dim2 = Integer.parseInt(st1.nextToken ());
                                  dim3 = Integer.parseInt(st1.nextToken ());
-                                 System.out.println("dim1:"+dim1 +" dim2:"+dim2 +" dim3:"+dim3);
+                                 //System.out.println("dim1:"+dim1 +" dim2:"+dim2 +" dim3:"+dim3);
                                  pro1 = (atu1+1)-dim1;
                                  pro2 = (atu2+1)-dim2;
                                  pro3 = (atu3+1)-dim3;
                                  System.out.println("pro1:"+pro1 +" pro2:"+pro2 +" pro3:"+pro3);
-                            }
+                                FileWriter arquivo;
+                                String fileName = "Arquivo";
+                                arquivo = new FileWriter(new File(fileName+".txt"),true);
+                                arquivo.write(pro1+" "+pro2+" "+pro3+"\n");
+                                arquivo.close();
+                            }                                            
                         }
+                        
+                        
                         bf_Atualiza.close();
                         bf_Diminuir.close();
                     break;
