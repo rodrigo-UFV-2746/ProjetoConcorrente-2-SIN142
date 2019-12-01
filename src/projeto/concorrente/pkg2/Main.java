@@ -104,7 +104,7 @@ public class Main {
                     t9.join();
                     t10.start();
                     t10.join();
-
+//tesgtre
                     break;
 
                 default:
