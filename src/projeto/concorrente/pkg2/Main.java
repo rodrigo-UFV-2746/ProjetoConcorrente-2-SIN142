@@ -74,36 +74,13 @@ public class Main {
                     bf_Diminuir.close();
                     break;
                 case 2:
-                    AtualizaTread t1 = new AtualizaTread(0);
-                    AtualizaTread t2 = new AtualizaTread(1);
-                    AtualizaTread t3 = new AtualizaTread(2);
-                    AtualizaTread t4 = new AtualizaTread(3);
-                    AtualizaTread t5 = new AtualizaTread(4);
-                    AtualizaTread t6 = new AtualizaTread(5);
-                    AtualizaTread t7 = new AtualizaTread(6);
-                    AtualizaTread t8 = new AtualizaTread(7);
-                    AtualizaTread t9 = new AtualizaTread(8);
-                    AtualizaTread t10 = new AtualizaTread(9);
-                    t1.start();
-                    t1.join();
-                    t2.start();
-                    t2.join();
-                    t3.start();
-                    t3.join();
-                    t4.start();
-                    t4.join();
-                    t5.start();
-                    t5.join();
-                    t6.start();
-                    t6.join();
-                    t7.start();
-                    t7.join();
-                    t8.start();
-                    t8.join();
-                    t9.start();
-                    t9.join();
-                    t10.start();
-                    t10.join();
+                    AtualizaTread t[] = new AtualizaTread[10]; // Vetor de Threads
+                    
+                    for (int i = 0; i < t.length; i++){
+                        t[i] = new AtualizaTread();
+                        t[i].start();
+                        t[i].join();
+                    }
 //tesgtre
                     break;
 
