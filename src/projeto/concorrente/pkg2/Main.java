@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+import java.util.concurrent.Semaphore;
 
 public class Main {
 
@@ -37,55 +38,48 @@ public class Main {
                 case 1:
                     BufferedReader bf_Atualiza = new BufferedReader(new FileReader("atualizarValores.txt"));
                     BufferedReader bf_Diminuir = new BufferedReader(new FileReader("diminuirValores.txt"));
-                    for (int i = 0; i < 1000; i++) {
-                        String line = bf_Atualiza.readLine();
-                        StringTokenizer st = new StringTokenizer(line);
-                        String line1 = bf_Diminuir.readLine();
-                        StringTokenizer st1 = new StringTokenizer(line1);
-                        while (st.hasMoreTokens() && st1.hasMoreTokens()) {
-                            //variaveis temp para guarda valores atulizados.
-                            int atu1 = 0, atu2 = 0, atu3 = 0;
-                            int dim1 = 0, dim2 = 0, dim3 = 0;
-                            //variaveis temp para guarda valores prontos.
-                            int pro1 = 0, pro2 = 0, pro3 = 0;
-                            //valores serem atualizador linha i;
-                            atu1 = Integer.parseInt(st.nextToken());
-                            atu2 = Integer.parseInt(st.nextToken());
-                            atu3 = Integer.parseInt(st.nextToken());
-                            System.out.println("Atu1:" + atu1 + " Atu1:" + atu2 + " Atu1:" + atu3);
-                            //valores a serem diminuidos linha i;
-                            dim1 = Integer.parseInt(st1.nextToken());
-                            dim2 = Integer.parseInt(st1.nextToken());
-                            dim3 = Integer.parseInt(st1.nextToken());
-                            System.out.println("dim1:" + dim1 + " dim2:" + dim2 + " dim3:" + dim3);
-                            pro1 = (atu1 + 1) - dim1;
-                            pro2 = (atu2 + 1) - dim2;
-                            pro3 = (atu3 + 1) - dim3;
-                            System.out.println("pro1:" + pro1 + " pro2:" + pro2 + " pro3:" + pro3);
-                            FileWriter arquivo;
-                            String fileName = "Arquivo";
-                            arquivo = new FileWriter(new File(fileName + ".txt"), true);
-                            arquivo.write(pro1 + " " + pro2 + " " + pro3 + "\n");
-                            arquivo.close();
-                        }
+                    int [] valoresFinais = new int[3];
+                    String [] valoresLidos = new String[3];
+                    String linha;
+                    while ((linha = bf_Atualiza.readLine()) != null) {
+                        valoresLidos = linha.split(" ");
+                        valoresFinais[0] += Integer.parseInt(valoresLidos[0]);
+                        valoresFinais[1] += Integer.parseInt(valoresLidos[1]);
+                        valoresFinais[2] += Integer.parseInt(valoresLidos[2]);
                     }
-
+                    while ((linha = bf_Diminuir.readLine()) != null) {
+                        valoresLidos = linha.split(" ");
+                        valoresFinais[0] -= Integer.parseInt(valoresLidos[0]);
+                        valoresFinais[1] -= Integer.parseInt(valoresLidos[1]);
+                        valoresFinais[2] -= Integer.parseInt(valoresLidos[2]);                        
+                    }
+                    System.out.println(" Valores finais sequencial");
+                    System.out.println(" Views: " + valoresFinais[0]);
+                    System.out.println(" Likes: " + valoresFinais[1]);
+                    System.out.println(" Dislikes: " + valoresFinais[2]);
+                    
                     bf_Atualiza.close();
                     bf_Diminuir.close();
                     break;
                 case 2:
                     AtualizaTread t[] = new AtualizaTread[10]; // Vetor de Threads
-                    
+                    Semaphore s = new Semaphore(1);
+                    int inicioDeLeitura = 0;
                     for (int i = 0; i < t.length; i++){
-                        t[i] = new AtualizaTread();
-                        t[i].start();
+                        t[i] = new AtualizaTread(inicioDeLeitura, s); // start() no contrutor
+                        inicioDeLeitura += 100;  // Cada thread le 100 linhas
+                    }                                           
+                    for (int i = 0; i < t.length; i++)
                         t[i].join();
-                    }
-//tesgtre
+                    valoresFinais = AtualizaTread.getValoresFinais();
+                    System.out.println(" Valores finais com 10 Threads");
+                    System.out.println(" Views: " + valoresFinais[0]);
+                    System.out.println(" Likes: " + valoresFinais[1]);
+                    System.out.println(" Dislikes: " + valoresFinais[2]);
                     break;
 
                 default:
-                    System.out.println("entrada inválida");
+                    System.out.println("Entrada inválida");
 
             }
         } while (controlador != 0);
