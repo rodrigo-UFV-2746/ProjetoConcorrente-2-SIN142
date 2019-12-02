@@ -1,95 +1,92 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package projeto.concorrente.pkg2;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.StringTokenizer;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- *
- * @author RODRIGO-NOT
- */
 public class AtualizaTread extends Thread {
+    // Os arquivos têm 1000 linhas. Com 10 theads, 1000/10 linhas pra cada thread    
+    private int inicioDeLeitura;
+    // Todas as Thread atualizam os valores desse vetor compartilhado de inteiro
+    private static int [] valoresFinais = new int[3];
+    private Semaphore s;
 
-    private int inicio;
-
-    public AtualizaTread() {
-
+    // Construtores
+    public AtualizaTread(int inicioDeLeitura) { 
+        this.inicioDeLeitura = inicioDeLeitura;
+        start();
+    }
+    public AtualizaTread(int inicioDeLeitura, Semaphore s){
+        this.inicioDeLeitura = inicioDeLeitura;
+        this.s = s;
+        start();
+    }
+    
+    // Gets e Sets
+    public int getInicioDeLeitura() {
+        return inicioDeLeitura;
+    }
+    public void setInicioDeLeitura(int inicioDeLeitura) {
+        this.inicioDeLeitura = inicioDeLeitura;
+    }
+    public static int[] getValoresFinais() {
+        return valoresFinais;
+    }
+    public static void setValoresFinais(int[] valoresFinais) {
+        AtualizaTread.valoresFinais = valoresFinais;
+    }
+    public Semaphore getS() {
+        return s;
+    }
+    public void setS(Semaphore s) {
+        this.s = s;
     }
 
-    public AtualizaTread(int inicio) {
-        this.inicio = inicio;
+    private void execucao(){
+        try {
+            BufferedReader bf_Atualiza = new BufferedReader(new FileReader("atualizarValores.txt"));
+            BufferedReader bf_Diminuir = new BufferedReader(new FileReader("diminuirValores.txt"));            
+            String [] valoresLidos = new String[3];
+            String linha;
+            // Pula as linhas que são de outras threads
+            for(int i = 0; i < this.inicioDeLeitura; i++) {
+                bf_Atualiza.readLine();
+                bf_Diminuir.readLine();
+            }
+            // Cada thread le 100 linhas do arquivo e atualiza valores
+            for (int i = 0; i < 100; i++) {  
+                linha = bf_Atualiza.readLine();               
+                valoresLidos = linha.split(" ");
+                AtualizaTread.valoresFinais[0] += Integer.parseInt(valoresLidos[0]);
+                AtualizaTread.valoresFinais[1] += Integer.parseInt(valoresLidos[1]);
+                AtualizaTread.valoresFinais[2] += Integer.parseInt(valoresLidos[2]);
+                
+                linha = bf_Diminuir.readLine();
+                valoresLidos = linha.split(" ");
+                AtualizaTread.valoresFinais[0] -= Integer.parseInt(valoresLidos[0]);
+                AtualizaTread.valoresFinais[1] -= Integer.parseInt(valoresLidos[1]);                        
+                AtualizaTread.valoresFinais[2] -= Integer.parseInt(valoresLidos[2]);
+            }           
+            
+            bf_Atualiza.close();
+            bf_Diminuir.close();
+            
+        } catch (IOException ex) {
+            Logger.getLogger(AtualizaTread.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-
-    public int getInicio() {
-        return inicio;
-    }
-
-    public void setInicio(int inicio) {
-        this.inicio = inicio;
-    }
-
+    
+    @Override
     public void run() {
         try {
-            do {
-                BufferedReader bf_AtualizaC = new BufferedReader(new FileReader("atualizarValores.txt"));
-                BufferedReader bf_DiminuirC = new BufferedReader(new FileReader("diminuirValores.txt"));
-                for (int i = 1; i <= this.getInicio(); i++) {
-
-                    String line = bf_AtualizaC.readLine();
-                    String line1 = bf_DiminuirC.readLine();
-
-                    if (this.getInicio() == i) {
-                        StringTokenizer st = new StringTokenizer(line);
-                        StringTokenizer st1 = new StringTokenizer(line1);
-                        while (st.hasMoreTokens() && st1.hasMoreTokens()) {
-
-                            //variaveis temp para guarda valores atulizados.
-                            int atu1 = 0, atu2 = 0, atu3 = 0;
-                            int dim1 = 0, dim2 = 0, dim3 = 0;
-                            //variaveis temp para guarda valores prontos.
-                            int pro1 = 0, pro2 = 0, pro3 = 0;
-                            //valores serem atualizador linha i;
-                            atu1 = Integer.parseInt(st.nextToken());
-                            atu2 = Integer.parseInt(st.nextToken());
-                            atu3 = Integer.parseInt(st.nextToken());
-                            System.out.println("Atu1:" + atu1 + " Atu1:" + atu2 + " Atu1:" + atu3);
-                            //valores a serem diminuidos linha i;
-                            dim1 = Integer.parseInt(st1.nextToken());
-                            dim2 = Integer.parseInt(st1.nextToken());
-                            dim3 = Integer.parseInt(st1.nextToken());
-                            //System.out.println("dim1:" + dim1 + " dim2:" + dim2 + " dim3:" + dim3);
-                            pro1 = (atu1 + 1) - dim1;
-                            pro2 = (atu2 + 1) - dim2;
-                            pro3 = (atu3 + 1) - dim3;
-                            //System.out.println("pro1:" + pro1 + " pro2:" + pro2 + " pro3:" + pro3);
-
-                            FileWriter arquivo;
-                            String fileName = "Arquivo";
-                            arquivo = new FileWriter(new File(fileName + ".txt"), true);
-                            arquivo.write(pro1 + " " + pro2 + " " + pro3 + "\n");
-                            arquivo.close();
-
-                        }
-                    }
-
-                }
-                this.setInicio(this.getInicio() + 10);
-                bf_AtualizaC.close();
-                bf_DiminuirC.close();
-
-            } while (this.getInicio() < 1000);
-
-        } catch (Exception ex) {
-
-            System.out.println("Thread terminada...");
+            s.acquire();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(AtualizaTread.class.getName()).log(Level.SEVERE, null, ex);
         }
+        this.execucao();
+        s.release();
     }
 }
