@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.FileReader;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class AtualizaTread extends Thread {
     // Os arquivos têm 1000 linhas. Com 10 theads, 1000/10 linhas pra cada thread    
@@ -13,15 +11,14 @@ public class AtualizaTread extends Thread {
     // Todas as Thread atualizam os valores desse vetor compartilhado de inteiro
     private static int [] valoresFinais = new int[3];
     private Semaphore s;
-
+    private boolean comSemaphore; // Controla se vão executar com semaforo ou não
+    
     // Construtores
-    public AtualizaTread(int inicioDeLeitura) { 
-        this.inicioDeLeitura = inicioDeLeitura;
-        start();
-    }
-    public AtualizaTread(int inicioDeLeitura, Semaphore s){
+    public AtualizaTread( ){    }
+    public AtualizaTread(int inicioDeLeitura, Semaphore s, boolean comSemaphore) {
         this.inicioDeLeitura = inicioDeLeitura;
         this.s = s;
+        this.comSemaphore = comSemaphore;
         start();
     }
     
@@ -44,6 +41,12 @@ public class AtualizaTread extends Thread {
     public void setS(Semaphore s) {
         this.s = s;
     }
+    public boolean isComSemaphore() {
+        return comSemaphore;
+    }
+    public void setComSemaphore(boolean comSemaphore) {
+        this.comSemaphore = comSemaphore;
+    }       
 
     private void execucao(){
         try {
@@ -69,24 +72,27 @@ public class AtualizaTread extends Thread {
                 AtualizaTread.valoresFinais[0] -= Integer.parseInt(valoresLidos[0]);
                 AtualizaTread.valoresFinais[1] -= Integer.parseInt(valoresLidos[1]);                        
                 AtualizaTread.valoresFinais[2] -= Integer.parseInt(valoresLidos[2]);
-            }           
-            
+            }            
             bf_Atualiza.close();
             bf_Diminuir.close();
             
-        } catch (IOException ex) {
-            Logger.getLogger(AtualizaTread.class.getName()).log(Level.SEVERE, null, ex);
+        } catch(IOException ex) {
+            System.out.println(" Erro inesperado, " + ex.getMessage());
         }
     }
     
     @Override
-    public void run() {
-        try {
-            s.acquire();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(AtualizaTread.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        this.execucao();
-        s.release();
+    public void run(){
+        if( this.isComSemaphore() ){ // Executa com semaforo fazendo exclusão
+            try {
+                s.acquire();
+                this.execucao();
+                s.release();
+            } catch (InterruptedException ex) {
+                System.out.println(" Erro durante acquire do semaforo.");
+            }
+        }else{
+            this.execucao(); 
+        }        
     }
 }
